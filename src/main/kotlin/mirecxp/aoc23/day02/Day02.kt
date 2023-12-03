@@ -1,4 +1,4 @@
-package mirecxp.aoc23.day01
+package mirecxp.aoc23.day02
 
 import java.io.File
 
