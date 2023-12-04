@@ -1,1 +1,5 @@
-/input/
+/input/real/
+/build/
+/.idea/
+/gradle/
+/.gradle/
