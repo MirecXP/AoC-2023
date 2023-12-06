@@ -14,6 +14,31 @@ class Day05(private val inputPath: String) {
         fun getTargetRange() = LongRange(target, target + length - 1)
     }
 
+    // https://www.reddit.com/r/adventofcode/comments/18b4b0r/comment/kc2hh66/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+    fun solve2() {
+        val seeds: List<LongRange> = lines.first().substringAfter(" ").split(" ").map { it.toLong() }.chunked(2)
+            .map { it.first()..<it.first() + it.last() }
+        val maps: List<Map<LongRange, LongRange>> = lines.drop(2).joinToString("\n").split("\n\n").map { section ->
+            section.lines().drop(1).associate {
+                it.split(" ").map { it.toLong() }.let { (dest, source, length) ->
+                    source..(source + length) to dest..(dest + length)
+                }
+            }
+        }
+        val res = seeds.flatMap { seedsRange: LongRange ->
+            maps.fold(listOf(seedsRange)) { aac: List<LongRange>, map: Map<LongRange, LongRange> ->
+                aac.flatMap {
+                    map.entries.mapNotNull { (source, dest) ->
+                        (maxOf(source.first, it.first) to minOf(source.last, it.last)).let { (start, end) ->
+                            if (start <= end) (dest.first - source.first).let { (start + it)..(end + it) } else null
+                        }
+                    }
+                }
+            }
+        }.minOf { it.first }
+        println(res)
+    }
+
     fun solve(part2: Boolean): String {
         println("Solving day 5 for ${lines.size} lines [$inputPath]")
 
@@ -39,7 +64,7 @@ class Day05(private val inputPath: String) {
         }
         rangeChain.add(rangeMapList) //last one
 
-//        checkOverlaps(rangeChain)
+//        checkOverlaps(rangeChain)  // OOM :(
 
         val result = if (part2) {
             //part 2
@@ -50,8 +75,14 @@ class Day05(private val inputPath: String) {
                 LongRange(start, start + len - 1)
             }.forEachIndexed { i, rng: LongRange ->
                 println("Solving chunk $i, min so far = $min")
-                rng.forEach {
-                    val output = processSeedToMap(it, rangeChain)
+                var current: Long = 0
+                rng.forEachIndexed { index, seed ->
+                    val output = processSeedToMap(seed, rangeChain)
+                    val diff = seed - output
+                    if (current != diff) {
+                        println("It changed: $current -> $diff [$index]")
+                        current = diff
+                    }
                     if (output < min) {
                         min = output
                     }
@@ -85,25 +116,6 @@ class Day05(private val inputPath: String) {
         return output
     }
 
-/*
-
-
-    chain (0): 86->88
-    chain (1): 88->88
-    chain (2): 88->88
-    chain (3): 88->81
-    chain (4): 81->49
-    chain (5): 49->50
-    chain (6): 50->50
-    chain (7): 50->52
-    chain (8): 52->37
-    chain (9): 37->26
-    chain (10): 26->19
-    chain (11): 19->19
-    chain (12): 19->20
-    chain (13): 20->20
-    seed 86 mapped to 20
-*/
     fun checkOverlaps(rangeChain: LinkedList<LinkedList<RangeMap>>) {
         //check overlapping
         var isOverlapping = false
@@ -111,7 +123,7 @@ class Day05(private val inputPath: String) {
             mapList.forEachIndexed { indexList, rangeMap ->
                 val srcR = rangeMap.getSourceRange()
                 val dstR = rangeMap.getTargetRange()
-                for (i in indexList+1 until mapList.size) {
+                for (i in indexList + 1 until mapList.size) {
                     val srcR1 = mapList[i].getSourceRange()
                     val dstR1 = mapList[i].getTargetRange()
                     if (srcR.intersect(srcR1).isNotEmpty()) {
@@ -135,6 +147,7 @@ fun main(args: Array<String>) {
     check(testProblem.solve(part2 = true) == "46")
 
     val problem = Day05("real/day05a")
+//    problem.solve2()
     problem.solve(part2 = false)
     problem.solve(part2 = true)
 }
