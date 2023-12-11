@@ -3,18 +3,6 @@ package mirecxp.aoc23.day10
 import mirecxp.aoc23.readInput
 
 //https://adventofcode.com/2023/day/10
-
-/*
-| is a vertical pipe connecting north and south.
-- is a horizontal pipe connecting east and west.
-L is a 90-degree bend connecting north and east.
-J is a 90-degree bend connecting north and west.
-7 is a 90-degree bend connecting south and west.
-F is a 90-degree bend connecting south and east.
-. is ground; there is no pipe in this tile.
-S is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
- */
-
 data class Coord(val row: Int, val col: Int)
 
 sealed class Pipe(
@@ -274,31 +262,7 @@ class Day10(private val inputPath: String) {
                             }
                         }
                     }
-                    /*
-                    //not necessary, just for double check
-                    var crossesH = 0
-                    if (pipe.coord.col < pipes[0].size - 1) {
-                        //go right
-                        for (c in pipe.coord.col + 1 until pipes[0].size) {
-                            val checkPipe = pipes[rowIndex][c]
-                            if (loop.contains(checkPipe) && checkPipe.isVertical) crossesH++ else {
-                                if (loop.contains(checkPipe) && (checkPipe.isCorner)) {
-                                    if (lastCornerDir != null) {
-                                        if (checkPipe.dir[0] == lastCornerDir[0]) {
-                                            lastCornerDir = null
-                                        } else {
-                                            lastCornerDir = null
-                                            crossesH++
-                                        }
-                                    } else {
-                                        lastCornerDir = checkPipe.dir
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    */
-                    if (crossesV % 2 == 1) { // && crossesV % 2 == 1) {
+                    if (crossesV % 2 == 1) {
                         countInside++
                         if (debug) println("Inside: $pipe")
                     } else {
